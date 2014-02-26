@@ -89,7 +89,7 @@
     }
 
     if (!url || (!(options & SDWebImageRetryFailed) && isFailedUrl)) {
-        dispatch_main_sync_safe(^{
+        dispatch_main_async_safe(^{
             NSError *error = [NSError errorWithDomain:NSURLErrorDomain code:NSURLErrorFileDoesNotExist userInfo:nil];
             completedBlock(nil, error, SDImageCacheTypeNone, YES);
         });
@@ -112,7 +112,7 @@
 
         if ((!image || options & SDWebImageRefreshCached) && (![self.delegate respondsToSelector:@selector(imageManager:shouldDownloadImageForURL:)] || [self.delegate imageManager:self shouldDownloadImageForURL:url])) {
             if (image && options & SDWebImageRefreshCached) {
-                dispatch_main_sync_safe(^{
+                dispatch_main_async_safe(^{
                     // If image was found in the cache bug SDWebImageRefreshCached is provided, notify about the cached image
                     // AND try to re-download it in order to let a chance to NSURLCache to refresh it from server.
                     completedBlock(image, nil, cacheType, YES);
@@ -135,12 +135,12 @@
             }
             id <SDWebImageOperation> subOperation = [self.imageDownloader downloadImageWithURL:url options:downloaderOptions progress:progressBlock completed:^(UIImage *downloadedImage, NSData *data, NSError *error, BOOL finished) {
                 if (weakOperation.isCancelled) {
-                    dispatch_main_sync_safe(^{
+                    dispatch_main_async_safe(^{
                         completedBlock(nil, nil, SDImageCacheTypeNone, finished);
                     });
                 }
                 else if (error) {
-                    dispatch_main_sync_safe(^{
+                    dispatch_main_async_safe(^{
                         completedBlock(nil, error, SDImageCacheTypeNone, finished);
                     });
 
@@ -161,7 +161,7 @@
                         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
                             UIImage *transformedImage = [self.delegate imageManager:self transformDownloadedImage:downloadedImage withURL:url];
 
-                            dispatch_main_sync_safe(^{
+                            dispatch_main_async_safe(^{
                                 completedBlock(transformedImage, nil, SDImageCacheTypeNone, finished);
                             });
 
@@ -172,7 +172,7 @@
                         });
                     }
                     else {
-                        dispatch_main_sync_safe(^{
+                        dispatch_main_async_safe(^{
                             completedBlock(downloadedImage, nil, SDImageCacheTypeNone, finished);
                         });
 
@@ -193,7 +193,7 @@
             };
         }
         else if (image) {
-            dispatch_main_sync_safe(^{
+            dispatch_main_async_safe(^{
                 completedBlock(image, nil, cacheType, YES);
             });
             @synchronized (self.runningOperations) {
@@ -202,7 +202,7 @@
         }
         else {
             // Image not in cache and download disallowed by delegate
-            dispatch_main_sync_safe(^{
+            dispatch_main_async_safe(^{
                 completedBlock(nil, nil, SDImageCacheTypeNone, YES);
             });
             @synchronized (self.runningOperations) {

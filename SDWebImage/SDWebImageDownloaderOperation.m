@@ -264,7 +264,7 @@
                 UIImage *scaledImage = [self scaledImageForKey:self.request.URL.absoluteString image:image];
                 image = [UIImage decodedImageWithImage:scaledImage];
                 CGImageRelease(partialImageRef);
-                dispatch_main_sync_safe(^{
+                dispatch_main_async_safe(^{
                     if (self.completedBlock) {
                         self.completedBlock(image, nil, nil, NO);
                     }
